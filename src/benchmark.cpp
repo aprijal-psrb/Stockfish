@@ -144,12 +144,10 @@ void benchmark(const Position& current, istream& is) {
 
   uint64_t nodes = 0;
   TimePoint elapsed = now();
-  Position pos;
 
   for (size_t i = 0; i < fens.size(); ++i)
   {
-      StateListPtr states(new std::deque<StateInfo>(1));
-      pos.set(fens[i], Options["UCI_Chess960"], &states->back(), Threads.main());
+      Position pos(fens[i], Options["UCI_Chess960"], Threads.main());
 
       cerr << "\nPosition: " << i + 1 << '/' << fens.size() << endl;
 
@@ -158,8 +156,9 @@ void benchmark(const Position& current, istream& is) {
 
       else
       {
+          Search::StateStackPtr st;
           limits.startTime = now();
-          Threads.start_thinking(pos, states, limits);
+          Threads.start_thinking(pos, limits, st);
           Threads.main()->wait_for_search_finished();
           nodes += Threads.nodes_searched();
       }
